@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <h2>Welcome Back</h2>
+        <div id="email-form">
+            <div class="form-group">
+                <input type="email" id="login-email" placeholder="Enter your email" required>
+                <button onclick="checkEmail()" class="login-button">Continue</button>
+            </div>
+            <div class="register-link">
+                New user? <a href="/register">Register here</a>
+            </div>
+        </div>
+
+        <div id="face-auth" style="display: none;">
+            <p class="auth-instruction">Email verified. Please complete face authentication.</p>
+            <div class="video-container">
+                <video id="video" width="640" height="480" autoplay></video>
+            </div>
+            <canvas id="preview" width="640" height="480" style="display: none;"></canvas>
+            <div id="captured-image" class="captured-image"></div>
+            <button onclick="authenticate()" class="auth-button">Authenticate</button>
+            <p id="auth-message" class="auth-message"></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Main Container */
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+    }
+
+    /* Login Box */
+    .login-box {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 700px;
+    }
+
+    /* Header */
+    h2 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 32px;
+        font-weight: 600;
+    }
+
+    /* Form Group */
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    /* Input Fields */
+    input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+        outline: none;
+        margin-bottom: 15px;
+    }
+
+    input:focus {
+        border-color: #3498db;
+    }
+
+    /* Buttons */
+    .login-button, .auth-button {
+        width: 100%;
+        padding: 15px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .login-button:hover, .auth-button:hover {
+        background: #2980b9;
+    }
+
+    /* Video Container */
+    .video-container {
+        width: 100%;
+        margin: 20px 0;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    video {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* Captured Image */
+    .captured-image {
+        margin: 20px 0;
+    }
+
+    .captured-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Messages */
+    .auth-instruction {
+        color: #2c3e50;
+        text-align: center;
+        margin: 20px 0;
+        font-size: 18px;
+    }
+
+    .auth-message {
+        text-align: center;
+        margin: 15px 0;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    /* Register Link */
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+        color: #7f8c8d;
+    }
+
+    .register-link a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .login-box {
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
+        input, .login-button, .auth-button {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .auth-instruction {
+            font-size: 16px;
+        }
+    }
+</style>
+
+
+<script>
+async function checkEmail() {
+    const email = document.getElementById('login-email').value;
+    const response = await fetch('/check-email', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `email=${email}`
+    });
+    const data = await response.json();
+
+    if (data.exists) {
+        document.getElementById('email-form').style.display = 'none';
+        document.getElementById('face-auth').style.display = 'block';
+        startVideo();
+    } else {
+        alert('Email not registered. Please register first.');
+        window.location.href = '/register';
+    }
+}
+
+async function startVideo() {
+    const video = document.getElementById('video');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+}
+
+async function authenticate() {
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    const preview = document.getElementById('preview');
+    const message = document.getElementById('auth-message');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+    const formData = new FormData();
+    formData.append('image', blob);
+
+    const response = await fetch('/login', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await response.json();
+
+    if (data.image) {
+        document.getElementById('captured-image').innerHTML =
+            `<img src="data:image/jpeg;base64,${data.image}" width="640" height="480">`;
+    }
+
+    if (data.success) {
+        message.textContent = "Authentication successful! Redirecting...";
+        message.style.color = "green";
+        setTimeout(() => window.location.href = '/dashboard', 1500);
+    } else {
+        message.textContent = data.error;
+        message.style.color = "red";
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1 class="title">Face Authentication System</h1>
+        <p class="subtitle">Secure Access Through Facial Recognition</p>
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Secure</h3>
+                <p>Advanced facial recognition for enhanced security</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bolt"></i>
+                <h3>Fast</h3>
+                <p>Quick and seamless authentication process</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-user-check"></i>
+                <h3>Reliable</h3>
+                <p>Accurate face detection and verification</p>
+            </div>
+        </div>
+        <div class="cta-buttons">
+            <a href="{{ url_for('register') }}" class="button primary">Register Now</a>
+            <a href="{{ url_for('login') }}" class="button secondary">Login</a>
+        </div>
+    </div>
+</div>
+
+<div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Register</h3>
+            <p>Create your account with email verification</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Face Scan</h3>
+            <p>Complete a one-time face registration</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Login</h3>
+            <p>Quick access through facial recognition</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

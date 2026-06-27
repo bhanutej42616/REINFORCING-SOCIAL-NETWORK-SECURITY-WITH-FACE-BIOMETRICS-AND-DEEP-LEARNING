@@ -1,0 +1,7 @@
+python == 3.12
+Flask  == 3.0.2
+Flask-Mail == 0.9.1
+Flask-MySQLdb == 2.0.0
+opencv-python == 4.9.0.80
+ultralytics==8.3.58
+numpy == 1.26.4
